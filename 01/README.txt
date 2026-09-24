@@ -25,3 +25,12 @@ https://www.python.org/downloads/
 #
 .\venv\Scripts\Activate.ps1
 flask --app main run --reload
+
+
+
+# no es necesario para los laboratorios
+# https://docs.github.com/en/get-started/using-github/hello-world
+git init
+git add .
+git commit -m "01"
+git push origin main
