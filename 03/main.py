@@ -34,6 +34,7 @@ class Teacher(db.Model):
     first_name: Mapped[str]
     last_name: Mapped[str]
     city: Mapped[str]
+    age: Mapped[int]
 
     def __repr__(self):
         return "<Teacher: {}>".format(self.id)
@@ -54,7 +55,3 @@ def view_health():
 
 with app.app_context():
     db.create_all()
-
-
-# LABORATORIO
-# correr esto y mandar un pantallazo del data.db
