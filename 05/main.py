@@ -16,19 +16,20 @@ class PokemonByNameResource(Resource):
     def get(self, name):
         data = requests.get("https://pokeapi.co/api/v2/pokemon/{}".format(name))
         raw = data.json()
+        new_abilities = []
+        for x in raw["abilities"]:
+            new_abilities.append(x["ability"]["name"])
+        new_forms = []
+        for x in raw["forms"]:
+            new_forms.append(x["name"])
         return {
             "id": raw["name"],
             "height": raw["height"],
             "weight": raw["weight"],
-            "abilities": [], # ["limber", "imposter", "..."]
-            "forms": [], # ["ditto"]
+            "abilities": new_abilities,
+            "forms": new_forms,
         }
 
 
 api.add_resource(HelloWorldResource, '/')
 api.add_resource(PokemonByNameResource, '/by-name/<name>')
-
-
-# LABORATORIO
-# incluir abilities y forms en la respuesta
-# http://127.0.0.1:5000/by-name/pikachu
