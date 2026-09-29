@@ -31,7 +31,11 @@
       <td>{{ item.code }}</td>
       <td>{{ item.first_name }}</td>
       <td>{{ item.last_name }}</td>
+      {% if item.age >= 30 %}
+      <td style="background:green;">{{ item.age }}</td>
+      {% else %}
       <td>{{ item.age }}</td>
+      {% endif %}
       <td>{{ item.created.strftime('%Y-%m-%d|%H:%M:%S') }}</td>
       <td>
         <a href="{{ url_for('view_users_by_id', user_id=item.id) }}" class="btn btn-info">View</a>

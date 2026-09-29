@@ -105,6 +105,13 @@ def view_users_delete_by_id(user_id):
         return redirect(url_for('view_users'))
 
 
+@app.route("/users/<int:user_id>/messages")
+def view_messages_by_user_id(user_id):
+    user = User.query.get_or_404(user_id)
+    items = Message.query.filter_by(user=user).all()
+    return render_template("messages.html", items=items)
+
+
 @app.route("/messages")
 def view_messages():
     items = Message.query.all()
