@@ -28,7 +28,7 @@ class User(db.Model):
 class Message(db.Model):
     __tablename__ = "messages"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.Text, nullable=True)
     created = db.Column(db.DateTime(timezone=True), server_default=func.now())
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -73,6 +73,22 @@ def view_users_add():
         return render_template("users-add.html", message="User saved")
 
 
-# LABORATORIO
-# /messages # mostrar los mensajes en una tabla
-# /messages/add # agregar un mensaje
+@app.route("/messages")
+def view_messages():
+    items = Message.query.all()
+    return render_template("messages.html", items=items)
+
+
+@app.route("/messages/add", methods=["GET", "POST"])
+def view_messages_add():
+    users = User.query.all()
+    if request.method == "GET":
+        return render_template("messages-add.html", users=users)
+    if request.method == "POST":
+        item = Message(
+            content=request.form["content"],
+            user_id=request.form["user_id"],
+        )
+        db.session.add(item)
+        db.session.commit()
+        return render_template("messages-add.html", users=users, message="Message saved")
