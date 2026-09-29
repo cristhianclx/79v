@@ -33,7 +33,11 @@
       <td>{{ item.last_name }}</td>
       <td>{{ item.age }}</td>
       <td>{{ item.created.strftime('%Y-%m-%d|%H:%M:%S') }}</td>
-      <td>-</td>
+      <td>
+        <a href="{{ url_for('view_users_by_id', user_id=item.id) }}" class="btn btn-info">View</a>
+        <a href="{{ url_for('view_users_edit_by_id', user_id=item.id) }}" class="btn btn-info">Edit</a>
+        <a href="{{ url_for('view_users_delete_by_id', user_id=item.id) }}" class="btn btn-danger">Delete</a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>

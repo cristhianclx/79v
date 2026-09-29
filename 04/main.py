@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.sql import func
@@ -73,6 +73,38 @@ def view_users_add():
         return render_template("users-add.html", message="User saved")
 
 
+@app.route("/users/<int:user_id>")
+def view_users_by_id(user_id):
+    item = User.query.get_or_404(user_id)
+    return render_template("users-view.html", item=item)
+
+
+@app.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
+def view_users_edit_by_id(user_id):
+    item = User.query.get_or_404(user_id)
+    if request.method == "GET":
+        return render_template("users-edit.html", item=item)
+    if request.method == "POST":
+        item.code = request.form["code"]
+        item.first_name=request.form["first_name"]
+        item.last_name=request.form["last_name"]
+        item.age=request.form["age"]
+        db.session.add(item)
+        db.session.commit()
+        return render_template("users-edit.html", item=item, message="User saved")
+
+
+@app.route("/users/<int:user_id>/delete", methods=["GET", "POST"])
+def view_users_delete_by_id(user_id):
+    item = User.query.get_or_404(user_id)
+    if request.method == "GET":
+        return render_template("users-delete.html", item=item)
+    if request.method == "POST":
+        db.session.delete(item)
+        db.session.commit()
+        return redirect(url_for('view_users'))
+
+
 @app.route("/messages")
 def view_messages():
     items = Message.query.all()
@@ -92,3 +124,9 @@ def view_messages_add():
         db.session.add(item)
         db.session.commit()
         return render_template("messages-add.html", users=users, message="Message saved")
+
+
+# LABORATORIO
+# /messages/1 => ver detalles
+# /messages/1/edit => editar
+# /messages/1/delete => eliminar
