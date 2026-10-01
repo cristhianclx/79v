@@ -54,6 +54,20 @@ class Message(db.Model):
         return "<Message: {}>".format(self.id)
 
 
+class MessageSchema(ma.SQLAlchemyAutoSchema):
+    user = ma.Nested(UserSchema)
+
+    class Meta:
+        model = Message
+        load_instance = True
+        include_fk = True
+        datetimeformat = "%Y-%m-%d %H:%M:%S"
+
+
+message_schema = MessageSchema()
+messages_schema = MessageSchema(many = True)
+
+
 class HealthResource(Resource):
     def get(self):
         return {'v': '6'}
@@ -95,12 +109,28 @@ class UsersByIDResource(Resource):
         return {}, 204
 
 
+class MessagesResource(Resource):
+    def get(self):
+        items = Message.query.all()
+        return messages_schema.dump(items)
+
+
+class MessagesByIDResource(Resource):
+    def get(self, id):
+        item = Message.query.get_or_404(id)
+        return message_schema.dump(item)
+
+
 api.add_resource(HealthResource, '/')
 api.add_resource(UsersResource, '/users')
 api.add_resource(UsersByIDResource, '/users/<int:id>')
+api.add_resource(MessagesResource, '/messages')
+api.add_resource(MessagesByIDResource, '/messages/<int:id>')
 
 
 # LABORATORIO
-# hagamos todo lo mismo para el message
-# /messages GET
-# /messages/id GET
+# /messages/ POST
+# /messages/id/ PATCH
+# /messages/id/ DELETE
+
+# pantallazos: postman / insomnia / curl
