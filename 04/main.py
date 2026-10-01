@@ -133,7 +133,31 @@ def view_messages_add():
         return render_template("messages-add.html", users=users, message="Message saved")
 
 
-# LABORATORIO
-# /messages/1 => ver detalles
-# /messages/1/edit => editar
-# /messages/1/delete => eliminar
+@app.route("/messages/<int:message_id>")
+def view_messages_by_id(message_id):
+    item = Message.query.get_or_404(message_id)
+    return render_template("messages-view.html", item=item)
+
+
+@app.route("/messages/<int:message_id>/edit", methods=["GET", "POST"])
+def view_messages_edit_by_id(message_id):
+    item = Message.query.get_or_404(message_id)
+    if request.method == "GET":
+        return render_template("messages-edit.html", item=item)
+    if request.method == "POST":
+        item.content = request.form["content"]
+        item.user_id = request.form["user_id"]
+        db.session.add(item)
+        db.session.commit()
+        return render_template("messages-edit.html", item=item, message="Message saved")
+
+
+@app.route("/messages/<int:message_id>/delete", methods=["GET", "POST"])
+def view_messages_delete_by_id(message_id):
+    item = Message.query.get_or_404(message_id)
+    if request.method == "GET":
+        return render_template("messages-delete.html", item=item)
+    if request.method == "POST":
+        db.session.delete(item)
+        db.session.commit()
+        return redirect(url_for('view_messages'))
