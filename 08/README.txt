@@ -27,4 +27,5 @@ flask --app main shell
 >>> for index, row in df.iterrows():
 >>>     item = Joke(routine_id=row["routine_id"], show_id=row["show_id"], event_name=row["event_name"], show_name=row["show_name"], start_timestamp=row["start_timestamp"], text=row["text"], video_id=row["video_id"])
 >>>     db.session.add(item)
+>>> 
 >>> db.session.commit()
