@@ -3,5 +3,6 @@ Flask-SQLAlchemy
 Flask-Migrate
 flask-restful
 flask-marshmallow
+gunicorn[gevent]
 marshmallow-sqlalchemy
 pandas

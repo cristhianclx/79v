@@ -58,21 +58,23 @@ class HealthResource(Resource):
 
 class JokesResource(Resource):
     def get(self):
-        pagination_parameters = pagination_parser.parse_args()
-        page = pagination_parameters["page"]
-        per_page = pagination_parameters["per_page"]
-        data = Joke.query.paginate(page=page, per_page=per_page, error_out=False)
-        return jsonify({
-            "metadata": {
-                "page": data.page,
-                "per_page": data.per_page,
-                "total_items": data.total,
-                "total_pages": data.pages,
-                "has_next": data.has_next,
-                "has_prev": data.has_prev,
-            },
-            "items": jokes_schema.dump(data.items),
-        })
+        #pagination_parameters = pagination_parser.parse_args()
+        #page = pagination_parameters["page"]
+        #per_page = pagination_parameters["per_page"]
+        #data = Joke.query.paginate(page=page, per_page=per_page, error_out=False)
+        #return jsonify({
+        #    "metadata": {
+        #        "page": data.page,
+        #        "per_page": data.per_page,
+        #        "total_items": data.total,
+        #        "total_pages": data.pages,
+        #        "has_next": data.has_next,
+        #        "has_prev": data.has_prev,
+        #    },
+        #    "items": jokes_schema.dump(data.items),
+        #})
+        items = Joke.query.all()
+        return jokes_schema.dump(items)
 
     def post(self):
         data = request.get_json()

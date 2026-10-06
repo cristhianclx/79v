@@ -29,3 +29,14 @@ flask --app main shell
 >>>     db.session.add(item)
 >>> 
 >>> db.session.commit()
+
+
+# ngrok
+# ngrok config add-authtoken xxx
+# ngrok http 5000
+
+# https://devcenter.heroku.com/articles/heroku-cli
+# heroku login
+#   .python-version
+#   Procfile
+# heroku create
