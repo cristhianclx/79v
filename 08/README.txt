@@ -39,4 +39,8 @@ flask --app main shell
 # heroku login
 #   .python-version
 #   Procfile
+# git init
 # heroku create
+# git add .
+# git commit -m "message"
+# git push heroku main
