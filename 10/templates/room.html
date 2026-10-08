@@ -14,16 +14,27 @@
             $("#form").on("submit", function(e) {
                 let nickname = $("#nickname").val();
                 let content = $("#content").val();
+                let importance = $("#importance").val();
                 socket.emit("ws-messages", {
                     "nickname": nickname,
                     "content": content,
+                    "importance": importance,
+                    "room_id": {{ room.id }},
                 })
                 $("#content").val("").focus();
                 return false;
             })
         })
         socket.on("ws-messages-responses", function(msg) {
-            $("#messages").append("<p><b>" + msg.nickname + ":</b> " + msg.content + "</p>")
+            if (msg.importance == "high") {
+                $("#messages").append("<p style='color:red'><b>" + msg.nickname + ":</b> " + msg.content + "</p>");
+            } else {
+                $("#messages").append("<p><b>" + msg.nickname + ":</b> " + msg.content + "</p>");
+            }
+        })
+        socket.on("ws-messages-error-{{ room.id }}" , function() {
+            console.log("error");
+            alert("Max messages");
         })
     </script>
     <title>Message</title>
@@ -33,7 +44,7 @@
     <hr>
     <div id="messages">
         {% for item in items %}
-        <p><b>{{ item.nickname }}:</b> {{ item.content }}</p>
+        <p {% if item.importance == "high" %} style="color:red;"{% endif %}><b>{{ item.nickname }}:</b> {{ item.content }}</p>
         {% endfor %}
     </div>
     <hr>
@@ -45,6 +56,10 @@
         <div class="mb-3">
             <label class="form-label">Content</label>
             <input type="text" class="form-control" id="content">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Importance</label>
+            <input type="text" class="form-control" id="importance" value="low">
         </div>
         <button type="submit" class="btn btn-primary">Send</button>
     </form>

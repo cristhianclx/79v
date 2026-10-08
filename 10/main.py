@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -18,11 +18,25 @@ ma = Marshmallow(app)
 socketio = SocketIO(app)
 
 
+class Room(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    name = db.Column(db.Integer, nullable=False)
+    messages_max = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return f"<Room {self.id}>"
+
+
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created = db.Column(db.DateTime(timezone=True), server_default=func.now())
     nickname = db.Column(db.String(150), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    importance = db.Column(db.String(150), nullable=False)
+
+    room_id = db.Column(db.Integer, db.ForeignKey("room.id"))
+    room = db.relationship("Room", backref="room")
 
     def __repr__(self):
         return f"<Message {self.id}>"
@@ -32,6 +46,7 @@ class MessageSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Message
         load_instance = True
+        include_fk = True
         datetimeformat = "%Y-%m-%d %H:%M:%S"
 
 
@@ -40,13 +55,30 @@ message_schema = MessageSchema()
 
 @app.route("/")
 def view_index():
-    return render_template("index.html")
+    items = Room.query.all()
+    return render_template("index.html", items=items)
 
 
-@app.route("/room")
-def view_room():
-    items = Message.query.all()
-    return render_template("room.html", items=items)
+@app.route("/rooms/add", methods=["GET", "POST"])
+def view_rooms_add():
+    if request.method == "GET":
+        return render_template("rooms-add.html")
+    if request.method == "POST":
+        item = Room(
+            name=request.form["name"],
+            messages_max=request.form["messages_max"],
+        )
+        db.session.add(item)
+        db.session.commit()
+        return render_template("rooms-add.html", message="Room saved")
+
+
+
+@app.route("/room/<id>")
+def view_room_by_id(id):
+    room = Room.query.get_or_404(id)
+    items = Message.query.filter_by(room = room).all()
+    return render_template("room.html", items=items, room=room)
 
 
 @socketio.on("ws-welcome")
@@ -56,17 +88,16 @@ def handle_ws_welcome(data, methods=["GET", "POST"]):
 
 @socketio.on("ws-messages")
 def handle_ws_messages(data, methods=["GET", "POST"]):
-    item = Message(**data)
-    db.session.add(item)
-    db.session.commit()
-    socketio.emit("ws-messages-responses", message_schema.dump(item))
+    room = Room.query.get_or_404(data["room_id"])
+    messages = Message.query.filter_by(room = room).count()
+    if room.messages_max <= messages:
+        socketio.emit("ws-messages-error-".format(room.id), {})
+    else:
+        item = Message(**data)
+        db.session.add(item)
+        db.session.commit()
+        socketio.emit("ws-messages-responses", message_schema.dump(item))
 
 
-# crear una tabla Room
-# en la tabla Message, crearle el Room como FK
-# en el index.html y en la vista view_index, mostrar todas las salas
-# crear la opcion de crear una sala nueva (id, created, name, max_messages)
+# LABORATORIO
 # max_messages, numero maximo de mensajes para enviar en una sala
-# en la vista de room, mostrar solo los mensajes de una sala
-# en los mensajes agrega un campo importance (high, normal)
-# si es high que al mostrar el mensaje salga en rojo
